@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+elm make src/Main.elm --output=gh-pages/index.html
+cd gh-pages
+git add index.html
+git commit -m "publishing latest changes"
+git push
