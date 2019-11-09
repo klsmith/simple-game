@@ -24,27 +24,27 @@ speed =
 
 
 update : Computer -> Player -> Player
-update computer ((Player player) as p) =
+update { keyboard, mouse } (Player player) =
     Player
-        { x = player.x + (speed * toWasdX computer.keyboard)
-        , y = player.y + (speed * toWasdY computer.keyboard)
+        { x = player.x + (speed * toWasdX keyboard)
+        , y = player.y + (speed * toWasdY keyboard)
         , direction =
             directionFromPoints
                 (toPoint player)
-                (toPoint computer.mouse)
+                (toPoint mouse)
         }
 
 
 toWasdX : Keyboard -> Number
-toWasdX keyboard =
-    (tern (Set.member "d" keyboard.keys) 1 <| 0)
-        - (tern (Set.member "a" keyboard.keys) 1 <| 0)
+toWasdX { keys } =
+    (tern (Set.member "d" keys) 1 <| 0)
+        - (tern (Set.member "a" keys) 1 <| 0)
 
 
 toWasdY : Keyboard -> Number
-toWasdY keyboard =
-    (tern (Set.member "w" keyboard.keys) 1 <| 0)
-        - (tern (Set.member "s" keyboard.keys) 1 <| 0)
+toWasdY { keys } =
+    (tern (Set.member "w" keys) 1 <| 0)
+        - (tern (Set.member "s" keys) 1 <| 0)
 
 
 type alias Pointable record =
@@ -74,7 +74,7 @@ degreesFromRadians rads =
 
 
 view : Player -> Shape
-view ((Player player) as p) =
+view (Player player) =
     group
         [ outlinedCircle white black 32 1
         , arrowHead red 32

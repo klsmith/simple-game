@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser exposing (element)
 import Html exposing (Html, text)
+import ListUtil
 import Player exposing (Player)
 import Playground exposing (..)
 import Round
@@ -98,10 +99,15 @@ animateTitleState state tick =
 
 view : Computer -> Memory -> List Shape
 view { screen, time } { title, player, tick } =
-    [ background screen
-    , Player.view player
-    , viewTitle title tick
-    ]
+    let
+        titleShape =
+            viewTitle title tick
+    in
+    ListUtil.appendMaybe
+        [ background screen
+        , Player.view player
+        ]
+        titleShape
 
 
 background : Screen -> Shape
@@ -112,7 +118,7 @@ background { width, height } =
         ]
 
 
-viewTitle : Title -> Number -> Shape
+viewTitle : Title -> Number -> Maybe Shape
 viewTitle { text, state } tick =
     let
         shape =
@@ -122,19 +128,19 @@ viewTitle { text, state } tick =
     in
     case state of
         Start ->
-            fade 0 shape
+            Just (fade 0 shape)
 
         FadeIn ->
-            fade (tick / 300) shape
+            Just (fade (tick / 300) shape)
 
         Linger ->
-            shape
+            Just shape
 
         FadeOut ->
-            fade (1 - ((tick - 550) / 200)) shape
+            Just (fade (1 - ((tick - 550) / 200)) shape)
 
         Dead ->
-            fade 0 shape
+            Nothing
 
 
 
