@@ -1,5 +1,7 @@
 module Player exposing (Player, create, update, view)
 
+import Arrow exposing (Arrow, create)
+import CustomShapes exposing (arrowHead, outlinedCircle)
 import Playground exposing (..)
 import Round
 import Set
@@ -7,32 +9,45 @@ import Ternary exposing (tern)
 
 
 type Player
-    = Player
-        { x : Number
-        , y : Number
-        , direction : Number
-        }
+    = Player PlayerData
+
+
+type alias PlayerData =
+    { x : Number
+    , y : Number
+    , direction : Number
+    , power : Number
+    }
 
 
 create : ( Number, Number ) -> Player
 create ( x, y ) =
-    Player { x = x, y = y, direction = 0 }
+    Player
+        { x = x
+        , y = y
+        , direction = 0
+        , power = 0
+        }
 
 
 speed =
     16
 
 
-update : Computer -> Player -> Player
+update : Computer -> Player -> ( Player, List Arrow )
 update { keyboard, mouse } (Player player) =
-    Player
-        { x = player.x + (speed * toWasdX keyboard)
-        , y = player.y + (speed * toWasdY keyboard)
-        , direction =
-            directionFromPoints
-                (toPoint player)
-                (toPoint mouse)
+    ( Player
+        { player
+            | x = player.x + (speed * toWasdX keyboard)
+            , y = player.y + (speed * toWasdY keyboard)
+            , direction =
+                directionFromPoints
+                    (toPoint player)
+                    (toPoint mouse)
+            , power = updatePower player.power mouse
         }
+    , createArrows player mouse
+    )
 
 
 toWasdX : Keyboard -> Number
@@ -73,30 +88,54 @@ degreesFromRadians rads =
     rads * (180 / pi)
 
 
+updatePower : Number -> Mouse -> Number
+updatePower power mouse =
+    if mouse.down then
+        if power < 1 then
+            power + 0.01
+
+        else
+            1
+
+    else
+        0
+
+
+createArrows : PlayerData -> Mouse -> List Arrow
+createArrows { x, y, power, direction } mouse =
+    if power > 0.25 && not mouse.down then
+        [ Arrow.create ( x, y ) power direction ]
+
+    else
+        []
+
+
 view : Player -> Shape
 view (Player player) =
     group
         [ outlinedCircle white black 32 1
-        , arrowHead red 32
+        , aimingArrow player.power
         ]
         |> move player.x player.y
         |> rotate player.direction
 
 
-outlinedCircle : Color -> Color -> Number -> Number -> Shape
-outlinedCircle outlineColor fillColor size outlineSize =
-    group
-        [ circle outlineColor size
-        , circle fillColor (size - outlineSize)
-        ]
+aimingArrow : Number -> Shape
+aimingArrow power =
+    arrowHead (powerColor power) 32
+        |> moveX (power * -16)
 
 
-arrowHead : Color -> Number -> Shape
-arrowHead color radius =
-    polygon
-        red
-        [ ( -(radius / 2), radius / 4 )
-        , ( -(radius / 4), 0 )
-        , ( -(radius / 2), -(radius / 4) )
-        , ( radius, 0 )
-        ]
+powerColor : Number -> Color
+powerColor power =
+    let
+        red =
+            255
+
+        green =
+            255 - (power * 255)
+
+        blue =
+            green
+    in
+    rgb red green blue

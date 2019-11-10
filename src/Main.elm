@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Arrow exposing (Arrow, view)
 import Browser exposing (element)
 import Html exposing (Html, text)
 import ListUtil
@@ -21,6 +22,7 @@ init =
     { title = { text = "SIMPLE GAME", state = Start }
     , player = Player.create ( 0, 0 )
     , tick = 0
+    , arrows = []
     }
 
 
@@ -32,6 +34,7 @@ type alias Memory =
     { title : Title
     , player : Player
     , tick : Number
+    , arrows : List Arrow
     }
 
 
@@ -54,9 +57,13 @@ type TitleState
 
 
 update : Computer -> Memory -> Memory
-update computer ({ player, title, tick } as memory) =
+update computer ({ player, title, tick, arrows } as memory) =
     let
-        newPlayer =
+        updatedArrows =
+            List.map (Arrow.update computer.screen)
+                (List.filter (\a -> a.alive) arrows)
+
+        ( newPlayer, createdArrows ) =
             Player.update computer player
 
         newTitle =
@@ -66,6 +73,7 @@ update computer ({ player, title, tick } as memory) =
         | player = newPlayer
         , title = newTitle
         , tick = tick + 1
+        , arrows = updatedArrows ++ createdArrows
     }
 
 
@@ -98,15 +106,17 @@ animateTitleState state tick =
 
 
 view : Computer -> Memory -> List Shape
-view { screen, time } { title, player, tick } =
+view { screen, time } { title, player, tick, arrows } =
     let
         titleShape =
             viewTitle title tick
     in
     ListUtil.appendMaybe
-        [ background screen
-        , Player.view player
-        ]
+        ([ background screen
+         , Player.view player
+         ]
+            ++ List.map Arrow.view arrows
+        )
         titleShape
 
 
