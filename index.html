@@ -6814,10 +6814,14 @@ var $author$project$Player$directionFromPoints = F2(
 		return $author$project$Player$degreesFromRadians(
 			A2($elm$core$Basics$atan2, y2 - y1, x2 - x1));
 	});
-var $author$project$Player$speed = 16;
 var $author$project$Player$toPoint = function (record) {
 	return _Utils_Tuple2(record.x, record.y);
 };
+var $author$project$Player$updatePower = F2(
+	function (power, mouse) {
+		return mouse.down ? ((power < 1) ? (power + 0.01) : 1) : 0;
+	});
+var $author$project$Player$speed = 16;
 var $elm$core$Dict$get = F2(
 	function (targetKey, dict) {
 		get:
@@ -6875,6 +6879,11 @@ var $author$project$Player$toWasdX = function (_v0) {
 		1,
 		0);
 };
+var $author$project$Player$updateX = F3(
+	function (currentX, keyboard, screen) {
+		var newX = currentX + ($author$project$Player$speed * $author$project$Player$toWasdX(keyboard));
+		return (_Utils_cmp(newX - 32, screen.left) < 0) ? (screen.left + 32) : ((_Utils_cmp(newX + 32, screen.right) > 0) ? (screen.right - 32) : newX);
+	});
 var $author$project$Player$toWasdY = function (_v0) {
 	var keys = _v0.keys;
 	return A3(
@@ -6887,14 +6896,16 @@ var $author$project$Player$toWasdY = function (_v0) {
 		1,
 		0);
 };
-var $author$project$Player$updatePower = F2(
-	function (power, mouse) {
-		return mouse.down ? ((power < 1) ? (power + 0.01) : 1) : 0;
+var $author$project$Player$updateY = F3(
+	function (currentY, keyboard, screen) {
+		var newY = currentY + ($author$project$Player$speed * $author$project$Player$toWasdY(keyboard));
+		return (_Utils_cmp(newY - 32, screen.bottom) < 0) ? (screen.bottom + 32) : ((_Utils_cmp(newY + 32, screen.top) > 0) ? (screen.top - 32) : newY);
 	});
 var $author$project$Player$update = F2(
 	function (_v0, _v1) {
 		var keyboard = _v0.keyboard;
 		var mouse = _v0.mouse;
+		var screen = _v0.screen;
 		var player = _v1.a;
 		return _Utils_Tuple2(
 			$author$project$Player$Player(
@@ -6906,8 +6917,8 @@ var $author$project$Player$update = F2(
 							$author$project$Player$toPoint(player),
 							$author$project$Player$toPoint(mouse)),
 						power: A2($author$project$Player$updatePower, player.power, mouse),
-						x: player.x + ($author$project$Player$speed * $author$project$Player$toWasdX(keyboard)),
-						y: player.y + ($author$project$Player$speed * $author$project$Player$toWasdY(keyboard))
+						x: A3($author$project$Player$updateX, player.x, keyboard, screen),
+						y: A3($author$project$Player$updateY, player.y, keyboard, screen)
 					})),
 			A2($author$project$Player$createArrows, player, mouse));
 	});
