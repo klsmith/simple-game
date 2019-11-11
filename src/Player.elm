@@ -35,11 +35,11 @@ speed =
 
 
 update : Computer -> Player -> ( Player, List Arrow )
-update { keyboard, mouse } (Player player) =
+update { keyboard, mouse, screen } (Player player) =
     ( Player
         { player
-            | x = player.x + (speed * toWasdX keyboard)
-            , y = player.y + (speed * toWasdY keyboard)
+            | x = updateX player.x keyboard screen
+            , y = updateY player.y keyboard screen
             , direction =
                 directionFromPoints
                     (toPoint player)
@@ -50,10 +50,42 @@ update { keyboard, mouse } (Player player) =
     )
 
 
+updateX : Number -> Keyboard -> Screen -> Number
+updateX currentX keyboard screen =
+    let
+        newX =
+            currentX + (speed * toWasdX keyboard)
+    in
+    if (newX - 32) < screen.left then
+        screen.left + 32
+
+    else if (newX + 32) > screen.right then
+        screen.right - 32
+
+    else
+        newX
+
+
 toWasdX : Keyboard -> Number
 toWasdX { keys } =
     (tern (Set.member "d" keys) 1 <| 0)
         - (tern (Set.member "a" keys) 1 <| 0)
+
+
+updateY : Number -> Keyboard -> Screen -> Number
+updateY currentY keyboard screen =
+    let
+        newY =
+            currentY + (speed * toWasdY keyboard)
+    in
+    if (newY - 32) < screen.bottom then
+        screen.bottom + 32
+
+    else if (newY + 32) > screen.top then
+        screen.top - 32
+
+    else
+        newY
 
 
 toWasdY : Keyboard -> Number

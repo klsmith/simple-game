@@ -151,20 +151,3 @@ viewTitle { text, state } tick =
 
         Dead ->
             Nothing
-
-
-
--- Start ->
---     tern (tick > 0) FadeIn <| state
---
--- FadeIn ->
---     tern (tick > 300) Linger <| state
---
--- Linger ->
---     tern (tick > 550) FadeOut <| state
---
--- FadeOut ->
---     tern (tick > 750) Dead <| state
---
--- Dead ->
---     state
