@@ -34,6 +34,10 @@ speed =
     16
 
 
+radius =
+    32
+
+
 update : Computer -> Player -> ( Player, List Arrow )
 update { keyboard, mouse, screen } (Player player) =
     ( Player
@@ -56,11 +60,11 @@ updateX currentX keyboard screen =
         newX =
             currentX + (speed * toWasdX keyboard)
     in
-    if (newX - 32) < screen.left then
-        screen.left + 32
+    if (newX - radius) < screen.left then
+        screen.left + radius
 
-    else if (newX + 32) > screen.right then
-        screen.right - 32
+    else if (newX + radius) > screen.right then
+        screen.right - radius
 
     else
         newX
@@ -78,11 +82,11 @@ updateY currentY keyboard screen =
         newY =
             currentY + (speed * toWasdY keyboard)
     in
-    if (newY - 32) < screen.bottom then
-        screen.bottom + 32
+    if (newY - radius) < screen.bottom then
+        screen.bottom + radius
 
-    else if (newY + 32) > screen.top then
-        screen.top - 32
+    else if (newY + radius) > screen.top then
+        screen.top - radius
 
     else
         newY
@@ -145,7 +149,7 @@ createArrows { x, y, power, direction } mouse =
 view : Player -> Shape
 view (Player player) =
     group
-        [ outlinedCircle white black 32 1
+        [ outlinedCircle white black radius 1
         , aimingArrow player.power
         ]
         |> move player.x player.y
@@ -154,8 +158,8 @@ view (Player player) =
 
 aimingArrow : Number -> Shape
 aimingArrow power =
-    arrowHead (powerColor power) 32
-        |> moveX (power * -16)
+    arrowHead (powerColor power) radius
+        |> moveX (power * -(radius / 2))
 
 
 powerColor : Number -> Color
